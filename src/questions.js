@@ -250,3 +250,5 @@ const quizQuestion = [
         correct: 0,
     },
 ];
+
+export default quizQuestion;

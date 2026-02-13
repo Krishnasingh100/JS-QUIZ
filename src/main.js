@@ -1,3 +1,5 @@
+import quizQuestion from "./questions.js";
+
 const startBtn = document.getElementById("start-quiz");
 const welcomeBox = document.getElementById("quiz-welcome");
 const quizContainer = document.getElementById("quiz-container");
