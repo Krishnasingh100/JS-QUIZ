@@ -1,4 +1,4 @@
-import quizQuestion from "./questions.js";
+import quizQuestion, { easyQuestions, mediumQuestions, hardQuestions } from "./questions.js";
 
 const startBtn = document.getElementById("start-quiz");
 const welcomeBox = document.getElementById("quiz-welcome");
@@ -12,6 +12,7 @@ const scoreBox = document.getElementById("score-box");
 const finalScore = document.getElementById("final-score");
 const totalQuestions = document.getElementById("total-questions");
 const scoreMessage = document.getElementById("score-message");
+const scoreLevel = document.getElementById("score-level");
 
 
 let currentQuestionIndex = 0;
@@ -19,13 +20,24 @@ let score = 0;
 let userAnswers = [];
 let selectedQuestions = [];
 let isAnswered = false;
-const autoAdvanceDelay = 2000; // 2 seconds
+let selectedDifficulties = { easy: true, medium: true, hard: true };
+const autoAdvanceDelay = 1500; // 1.5 seconds
 
 // Initialize
 function init() {
     startBtn.addEventListener("click", startQuiz);
     optionButtons.forEach((button, index) => {
         button.addEventListener("click", () => selectAnswer(index));
+    });
+    
+    // Add checkbox listeners
+    const difficultyCheckboxes = document.querySelectorAll(".difficulty-checkbox");
+    difficultyCheckboxes.forEach(checkbox => {
+        // initialize from checkbox state
+        selectedDifficulties[checkbox.value] = checkbox.checked;
+        checkbox.addEventListener("change", (e) => {
+            selectedDifficulties[e.target.value] = e.target.checked;
+        });
     });
 }
 
@@ -50,9 +62,27 @@ function resetQuiz() {
 
 // Pick Random Questions
 function pickRandomQuestions() {
-    const numToPick = Math.min(20, quizQuestion.length);
+    // Combine questions based on selected difficulty levels
+    let availableQuestions = [];
+    
+    if (selectedDifficulties.easy) {
+        availableQuestions = [...availableQuestions, ...easyQuestions];
+    }
+    if (selectedDifficulties.medium) {
+        availableQuestions = [...availableQuestions, ...mediumQuestions];
+    }
+    if (selectedDifficulties.hard) {
+        availableQuestions = [...availableQuestions, ...hardQuestions];
+    }
+    
+    // If no difficulty selected, show all
+    if (availableQuestions.length === 0) {
+        availableQuestions = [...quizQuestion];
+    }
+    
+    const numToPick = Math.min(20, availableQuestions.length);
     selectedQuestions = [];
-    const available = [...quizQuestion];
+    const available = [...availableQuestions];
     for (let i = 0; i < numToPick; i++) {
         const randomIndex = Math.floor(Math.random() * available.length);
         selectedQuestions.push(available.splice(randomIndex, 1)[0]);
@@ -125,9 +155,11 @@ function nextQuestion() {
 
 // Update Progress
 function updateProgress() {
-    const progress = ((currentQuestionIndex + 1) / selectedQuestions.length) * 100;
+    const total = selectedQuestions.length || 0;
+    const current = total ? currentQuestionIndex + 1 : 0;
+    const progress = total ? ((current) / total) * 100 : 0;
     progressFill.style.width = `${progress}%`;
-    progressText.textContent = `${currentQuestionIndex + 1} / ${selectedQuestions.length}`;
+    progressText.textContent = `${current} / ${total}`;
 }
 
 // Show Score
@@ -139,7 +171,7 @@ function showScore() {
     totalQuestions.textContent = selectedQuestions.length;
 
     let message = "";
-    const percentage = (score / selectedQuestions.length) * 100;
+    const percentage = selectedQuestions.length ? (score / selectedQuestions.length) * 100 : 0;
     if (percentage >= 90) {
         message = "Excellent! You're a JavaScript master! 🏆";
     } else if (percentage >= 70) {
@@ -150,6 +182,17 @@ function showScore() {
         message = "Keep learning! JavaScript is a vast topic. 💪";
     }
     scoreMessage.textContent = message;
+
+    // Determine level from percentage
+    let levelText = "";
+    if (percentage >= 80) {
+        levelText = "Hard";
+    } else if (percentage >= 50) {
+        levelText = "Medium";
+    } else {
+        levelText = "Easy";
+    }
+    if (scoreLevel) scoreLevel.textContent = `Level: ${levelText}`;
 
     // Add restart button event listener
     const restartBtn = document.getElementById("restart");
