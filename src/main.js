@@ -20,8 +20,8 @@ let score = 0;
 let userAnswers = [];
 let selectedQuestions = [];
 let isAnswered = false;
-let selectedDifficulties = { easy: true, medium: true, hard: true };
-const autoAdvanceDelay = 1500; // 1.5 seconds
+let selectedDifficulty = null; // single selected difficulty: 'easy' | 'medium' | 'hard' | null (mixed/all)
+const autoAdvanceDelay = 800; // 1.5 seconds
 
 // Initialize
 function init() {
@@ -30,15 +30,20 @@ function init() {
         button.addEventListener("click", () => selectAnswer(index));
     });
     
-    // Add checkbox listeners
-    const difficultyCheckboxes = document.querySelectorAll(".difficulty-checkbox");
-    difficultyCheckboxes.forEach(checkbox => {
-        // initialize from checkbox state
-        selectedDifficulties[checkbox.value] = checkbox.checked;
-        checkbox.addEventListener("change", (e) => {
-            selectedDifficulties[e.target.value] = e.target.checked;
+    // Add difficulty radio listeners (single-select)
+    const difficultyRadios = document.querySelectorAll(".difficulty-checkbox");
+    // initialize selectedDifficulty from any checked radio (if present)
+    const initial = document.querySelector('.difficulty-checkbox:checked');
+    selectedDifficulty = initial ? initial.value : null;
+    difficultyRadios.forEach(radio => {
+        radio.addEventListener("change", (e) => {
+            // set the single selected difficulty value
+            selectedDifficulty = e.target.checked ? e.target.value : null;
         });
     });
+    // setup restart button once
+    const restartBtn = document.getElementById("restart");
+    if (restartBtn) restartBtn.addEventListener("click", restartQuiz);
 }
 
 // Start Quiz
@@ -64,19 +69,15 @@ function resetQuiz() {
 function pickRandomQuestions() {
     // Combine questions based on selected difficulty levels
     let availableQuestions = [];
-    
-    if (selectedDifficulties.easy) {
-        availableQuestions = [...availableQuestions, ...easyQuestions];
-    }
-    if (selectedDifficulties.medium) {
-        availableQuestions = [...availableQuestions, ...mediumQuestions];
-    }
-    if (selectedDifficulties.hard) {
-        availableQuestions = [...availableQuestions, ...hardQuestions];
-    }
-    
-    // If no difficulty selected, show all
-    if (availableQuestions.length === 0) {
+    // If a single difficulty is chosen, use only that set
+    if (selectedDifficulty === 'easy') {
+        availableQuestions = [...easyQuestions];
+    } else if (selectedDifficulty === 'medium') {
+        availableQuestions = [...mediumQuestions];
+    } else if (selectedDifficulty === 'hard') {
+        availableQuestions = [...hardQuestions];
+    } else {
+        // no single difficulty chosen -> combine all
         availableQuestions = [...quizQuestion];
     }
     
@@ -183,20 +184,9 @@ function showScore() {
     }
     scoreMessage.textContent = message;
 
-    // Determine level from percentage
-    let levelText = "";
-    if (percentage >= 80) {
-        levelText = "Hard";
-    } else if (percentage >= 50) {
-        levelText = "Medium";
-    } else {
-        levelText = "Easy";
-    }
-    if (scoreLevel) scoreLevel.textContent = `Level: ${levelText}`;
-
-    // Add restart button event listener
-    const restartBtn = document.getElementById("restart");
-    restartBtn.addEventListener("click", restartQuiz);
+    // Show the difficulty level the quiz was taken at (or Mixed/all if none selected)
+    const levelToShow = selectedDifficulty ? selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1) : "Mixed";
+    if (scoreLevel) scoreLevel.textContent = `Level: ${levelToShow}`;
 }
 
 // Restart Quiz
