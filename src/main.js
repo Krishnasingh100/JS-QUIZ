@@ -13,6 +13,7 @@ const finalScore = document.getElementById("final-score");
 const totalQuestions = document.getElementById("total-questions");
 const scoreMessage = document.getElementById("score-message");
 const scoreLevel = document.getElementById("score-level");
+ const difficultyRadios = document.querySelectorAll(".difficulty-checkbox");
 
 
 let currentQuestionIndex = 0;
@@ -20,8 +21,8 @@ let score = 0;
 let userAnswers = [];
 let selectedQuestions = [];
 let isAnswered = false;
-let selectedDifficulty = null; // single selected difficulty: 'easy' | 'medium' | 'hard' | null (mixed/all)
-const autoAdvanceDelay = 800; // 1.5 seconds
+let selectedDifficulty = null; // single selected difficulty: 'easy' | 'medium' | 'hard' 
+const autoAdvanceDelay = 800; // .8 seconds
 
 // Initialize
 function init() {
@@ -29,10 +30,8 @@ function init() {
     optionButtons.forEach((button, index) => {
         button.addEventListener("click", () => selectAnswer(index));
     });
-    
-    // Add difficulty radio listeners (single-select)
-    const difficultyRadios = document.querySelectorAll(".difficulty-checkbox");
-    // initialize selectedDifficulty from any checked radio (if present)
+
+// initialize selectedDifficulty from any checked radio (if present)
     const initial = document.querySelector('.difficulty-checkbox:checked');
     selectedDifficulty = initial ? initial.value : null;
     difficultyRadios.forEach(radio => {
