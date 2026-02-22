@@ -66,18 +66,14 @@ function resetQuiz() {
 
 // Pick Random Questions
 function pickRandomQuestions() {
-    // Combine questions based on selected difficulty levels
+    // Use only the selected difficulty level
     let availableQuestions = [];
-    // If a single difficulty is chosen, use only that set
     if (selectedDifficulty === 'easy') {
         availableQuestions = [...easyQuestions];
     } else if (selectedDifficulty === 'medium') {
         availableQuestions = [...mediumQuestions];
     } else if (selectedDifficulty === 'hard') {
         availableQuestions = [...hardQuestions];
-    } else {
-        // no single difficulty chosen -> combine all
-        availableQuestions = [...quizQuestion];
     }
     
     const numToPick = Math.min(20, availableQuestions.length);
@@ -183,8 +179,8 @@ function showScore() {
     }
     scoreMessage.textContent = message;
 
-    // Show the difficulty level the quiz was taken at (or Mixed/all if none selected)
-    const levelToShow = selectedDifficulty ? selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1) : "Mixed";
+    // Show the difficulty level the quiz was taken at
+    const levelToShow = selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1);
     if (scoreLevel) scoreLevel.textContent = `Level: ${levelToShow}`;
 }
 
